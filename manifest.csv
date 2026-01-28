@@ -1,47 +1,24 @@
 file_relpath,category,expected_error_code,expected_security_flags,notes
-
-# -----------------------------
-# PDF — SECURITY FLAGS (non-fatal)
-# -----------------------------
-files/pdf/security/javascript.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_PDF_HAS_JAVASCRIPT,PDF contains JS; should ingest + emit flags
-files/pdf/security/fileAttachment.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_HAS_EMBEDDED_FILES|FLAG_PDF_HAS_JAVASCRIPT,PDF with attachment/active content; should ingest + emit flags
-files/pdf/security/externalLink.pdf,pdf_security,,FLAG_HAS_EXTERNAL_LINKS,PDF with external URI links; should ingest + emit flags
-
-# These "encryption_*" files are treated as SECURITY corpus (permissions/restrictions).
-# Depending on current backend behavior, they may ingest OR raise ERR_PDF_ENCRYPTED.
-files/pdf/security/encryption_openpassword.pdf,pdf_security,ERR_PDF_ENCRYPTED,,Password-protected PDF; should fail with ERR_PDF_ENCRYPTED
-files/pdf/security/encryption_nocopy.pdf,pdf_security,,,Restricted permissions: no-copy (expected behavior may evolve)
-files/pdf/security/encryption_noprinting.pdf,pdf_security,,,Restricted permissions: no-printing (expected behavior may evolve)
-files/pdf/security/encryption_notextaccess (1).pdf,pdf_security,,,Restricted permissions: no-text-accessibility (expected behavior may evolve)
-
-# -----------------------------
-# PDF — PARSING FAILURES (fatal errors)
-# -----------------------------
-files/pdf/parsing/corruptionOneByteMissing.pdf,pdf_parsing,ERR_PARSE_FAILED,,Corrupted PDF; should fail parsing
-
-# -----------------------------
-# PDF — OCR / PARSING ROBUSTNESS (NOT security)
-# These are "hard parsing" cases; usually ingestion succeeds,
-# but quality/ordering/structure/OCR is what we're evaluating.
-# For now: expected_error_code blank, flags blank.
-# -----------------------------
-files/pdf/ocr/scanned_multicolumn_ocr_example.pdf,pdf_ocr,,,Scanned multi-column; OCR + reading order challenge
-files/pdf/ocr/uneven_multicolumn_reading_order.pdf,pdf_ocr,,,Uneven multi-column; reading-order confusion
-files/pdf/ocr/borderless_tables_structure_loss.pdf,pdf_ocr,,,Borderless tables; structure loss
-files/pdf/ocr/forms_structured_fields_va-10-10cg.pdf,pdf_ocr,,,Form-like layout; label/value association
-files/pdf/ocr/forms_checkbox_hell_irs_f1040.pdf,pdf_ocr,,,Checkbox-dense forms; spatial reasoning
-files/pdf/ocr/mixed_scanned_digital_stuyspec_xci_13.pdf,pdf_ocr,,,Mixed digital+scanned pages; duplication/missing text risks
-files/pdf/ocr/small_font_dense_scan_use_of_force_raw.pdf,pdf_ocr,,,Small font dense scan; OCR dropouts
-files/pdf/ocr/handwritten_medical_cursive_vrc2020.pdf,pdf_ocr,,,Handwriting/cursive; OCR failure modes
-files/pdf/ocr/old_technical_scan_5947285.pdf,pdf_ocr,,,Old technical scan; skew + margin bleed
-
-# -----------------------------
-# IMAGE/SVG — SECURITY FLAGS (non-fatal) / PARSING FAILURES
-# (Flags depend on implemented SVG threat scanner; start with "no flags" if not implemented yet)
-# -----------------------------
-files/image/security/minimal_svg.svg,image_security,,,Minimal SVG baseline
-files/image/security/svg_external_link.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,Svg <a href="https://..."> external link
-files/image/security/external_image_href.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,Svg external href in image/link reference
-files/image/security/active_content.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,Svg with script/active elements (expected behavior may evolve)
-files/image/security/embedded_foreignobject.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,Svg foreignObject HTML embedding (expected behavior may evolve)
-files/image/security/invalid_svg.svg,image_parsing,ERR_PARSE_FAILED,,Invalid SVG should fail parse/validation
+files/pdf/security/javascript.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_PDF_HAS_JAVASCRIPT,"PDF contains JS; should ingest + emit flags"
+files/pdf/security/fileAttachment.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_HAS_EMBEDDED_FILES|FLAG_PDF_HAS_JAVASCRIPT,"PDF with attachment/active content; should ingest + emit flags"
+files/pdf/security/externalLink.pdf,pdf_security,,FLAG_HAS_EXTERNAL_LINKS,"PDF with external URI links; should ingest + emit flags"
+files/pdf/security/encryption_openpassword.pdf,pdf_security,ERR_PDF_ENCRYPTED,,"Password-protected PDF; should fail with ERR_PDF_ENCRYPTED"
+files/pdf/security/encryption_nocopy.pdf,pdf_security,,,"Restricted permissions: no-copy (expected behavior may evolve)"
+files/pdf/security/encryption_noprinting.pdf,pdf_security,,,"Restricted permissions: no-printing (expected behavior may evolve)"
+files/pdf/security/encryption_notextaccess (1).pdf,pdf_security,,,"Restricted permissions: no-text-accessibility (expected behavior may evolve)"
+files/pdf/parsing/corruptionOneByteMissing.pdf,pdf_parsing,ERR_PARSE_FAILED,,"Corrupted PDF; should fail parsing"
+files/pdf/ocr/scanned_multicolumn_ocr_example.pdf,pdf_ocr,,,"Scanned multi-column; OCR + reading order challenge"
+files/pdf/ocr/uneven_multicolumn_reading_order.pdf,pdf_ocr,,,"Uneven multi-column; reading-order confusion"
+files/pdf/ocr/borderless_tables_structure_loss.pdf,pdf_ocr,,,"Borderless tables; structure loss"
+files/pdf/ocr/forms_structured_fields_va-10-10cg.pdf,pdf_ocr,,,"Form-like layout; label/value association"
+files/pdf/ocr/forms_checkbox_hell_irs_f1040.pdf,pdf_ocr,,,"Checkbox-dense forms; spatial reasoning"
+files/pdf/ocr/mixed_scanned_digital_stuyspec_xci_13.pdf,pdf_ocr,,,"Mixed digital+scanned pages; duplication/missing text risks"
+files/pdf/ocr/small_font_dense_scan_use_of_force_raw.pdf,pdf_ocr,,,"Small font dense scan; OCR dropouts"
+files/pdf/ocr/handwritten_medical_cursive_vrc2020.pdf,pdf_ocr,,,"Handwriting/cursive; OCR failure modes"
+files/pdf/ocr/old_technical_scan_5947285.pdf,pdf_ocr,,,"Old technical scan; skew + margin bleed"
+files/image/security/minimal_svg.svg,image_security,,,"Minimal SVG baseline"
+files/image/security/svg_external_link.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,"SVG <a href> external link"
+files/image/security/external_image_href.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,"SVG external href in image/link reference"
+files/image/security/active_content.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,"SVG with script/active elements (expected behavior may evolve)"
+files/image/security/embedded_foreignobject.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,"SVG foreignObject HTML embedding (expected behavior may evolve)"
+files/image/security/invalid_svg.svg,image_parsing,ERR_PARSE_FAILED,,"Invalid SVG should fail parse/validation"
