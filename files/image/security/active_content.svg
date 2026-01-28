@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="50">
+  <script type="text/javascript">
+    alert("pwned");
+  </script>
+  <text x="5" y="30">Hello</text>
+</svg>

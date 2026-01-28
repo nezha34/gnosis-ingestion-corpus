@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="70">
+  <foreignObject x="0" y="0" width="220" height="70">
+    <body xmlns="http://www.w3.org/1999/xhtml">
+      <p>Embedded HTML</p>
+    </body>
+  </foreignObject>
+</svg>
