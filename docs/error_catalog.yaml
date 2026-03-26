@@ -1,0 +1,417 @@
+version: 0.1
+last_updated: 2026-03-25
+owner_team: "Backend / Pipeline"
+
+# This is the team-shareable, machine-readable catalog.
+# Each entry is the "normalized truth" you can review in PRs,
+# and later use to generate UI copy, docs tables, and tests.
+
+enums:
+  outcomes:
+    - BLOCK
+    - RETRY
+    - WARN
+    - SKIP
+  stages:
+    - upload_validation
+    - extraction_pdf
+    - extraction_image #to be refined
+    - ingestion_raw_builder
+    - storage_minio #in progress
+    - parsing
+    - cleaning #in progress
+    - security
+  scopes:
+    - document
+    - page
+    - system
+
+entries:
+  # ---------------------------
+  # IngestionErrorCode (existing)
+  # ---------------------------
+  - code: ERR_EMPTY_UPLOAD
+    family: ingestion
+    stage: upload_validation
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "Uploaded file is empty"
+        - "Uploaded file is empty or unreadable"
+      canonical: "Uploaded file is empty."
+    sources:
+      - module: backend/src/backend/ingestion/format_validator.py
+        raises: UploadValidationError
+      - module: docker_mineru/mineru_api_service.py
+        returns_error_code: true
+
+  - code: ERR_FILE_TOO_LARGE
+    family: ingestion
+    stage: upload_validation
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "Uploaded file exceeds max allowed size ({max_bytes} bytes)"
+      canonical: "Uploaded file is too large."
+    sources:
+      - module: backend/src/backend/ingestion/format_validator.py
+        raises: UploadValidationError
+
+  - code: ERR_MIME_MISMATCH
+    family: ingestion
+    stage: upload_validation
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "File claims to be PDF but signature indicates {detected_type} ({detected_mime})"
+        - "File claims to be text but signature indicates {detected_type} ({detected_mime})"
+      canonical: "File type does not match its content."
+    sources:
+      - module: backend/src/backend/ingestion/format_validator.py
+        raises: UploadValidationError
+
+  - code: ERR_INVALID_SIGNATURE
+    family: ingestion
+    stage: upload_validation
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "File claims to be PDF but header signature is invalid or unknown (not %PDF-)"
+        - "Unknown or invalid binary signature (unsupported/unsafe upload)"
+      canonical: "File signature is invalid or unsupported."
+    sources:
+      - module: backend/src/backend/ingestion/format_validator.py
+        raises: UploadValidationError
+
+  - code: ERR_UNSUPPORTED_FILE_TYPE
+    family: ingestion
+    stage: upload_validation
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "Unsupported file type for ingestion: {detected_type}"
+        - "Unsupported file type for ingestion"
+        - "Slides are not supported yet"
+        - "Ingestion failed unexpectedly" # catch-all in raw_builder today
+      canonical: "Unsupported file type."
+    sources:
+      - module: backend/src/backend/ingestion/format_validator.py
+        raises: UploadValidationError
+      - module: backend/src/backend/ingestion/raw_builder.py
+        notes: "Catch-all currently maps unexpected ingestion failures to this code."
+
+  - code: ERR_DECODE_FAILED
+    family: ingestion
+    stage: upload_validation
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "Failed to decode text content (encoding unreadable)"
+        - "Text payload cannot be decoded as UTF-8 (unreadable encoding)"
+      canonical: "Could not read text encoding."
+    sources:
+      - module: backend/src/backend/ingestion/format_validator.py
+        raises: UploadValidationError
+      - module: backend/src/backend/ingestion/raw_builder.py
+        raises: UploadValidationError
+
+  - code: ERR_PDF_ENCRYPTED
+    family: ingestion
+    stage: extraction_pdf
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "PDF is encrypted or password-protected"
+      canonical: "PDF is encrypted or password-protected."
+    sources:
+      - module: backend/src/backend/ingestion/pdf_extractor.py
+        raises: UnsupportedPdfError
+
+  - code: ERR_PARSE_FAILED
+    family: ingestion
+    stage: extraction_pdf
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "PDF payload is empty"
+        - "PDF is corrupt or cannot be opened"
+        - "PDF page structure is unreadable"
+        - "PDF has no pages"
+        - "PDF page cannot be loaded"
+        - "PDF text extraction failed"
+        - "PDF contains no extractable text"
+        - "PDF extractor did not return required pages/page_count metadata"
+        - "PDF extractor returned empty pages metadata"
+        - "Failed to parse image bytes (corrupt/unsupported image)."
+        - "Failed to rasterize SVG for OCR (invalid/unsupported SVG)."
+        - "SVG has invalid dimensions."
+      canonical: "Could not parse document."
+    sources:
+      - module: backend/src/backend/ingestion/pdf_extractor.py
+        raises: UnsupportedPdfError
+      - module: backend/src/backend/ingestion/image_extractor.py
+        raises: ImageExtractorError
+      - module: backend/src/backend/ingestion/raw_builder.py
+        raises: UploadValidationError
+
+  - code: ERR_OCR_FAILED
+    family: ingestion
+    stage: extraction_pdf
+    scope: page
+    outcome: BLOCK
+    retryable: true
+    user_message:
+      current_sources:
+        - "OCR was attempted but failed and no text could be recovered"
+        - "OCR failed while processing image."
+        - "MinerU CLI timeout"
+      canonical: "OCR failed while processing the document."
+    sources:
+      - module: backend/src/backend/ingestion/pdf_extractor.py
+        raises: UnsupportedPdfError
+      - module: backend/src/backend/ingestion/image_extractor.py
+        raises: ImageExtractorError
+      - module: docker_mineru/mineru_parser.py
+        notes: "CLI timeout currently maps to ERR_OCR_FAILED."
+
+  - code: ERR_RESOURCE_LIMIT_EXCEEDED
+    family: ingestion
+    stage: extraction_pdf
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message:
+      current_sources:
+        - "PDF has too many pages ({page_count}); max allowed is {max_pages}"
+        - "SVG is too large to rasterize safely."
+        - "SVG is too complex to rasterize safely."
+        - "SVG dimensions exceed safe limits."
+        - "SVG rasterization pixel budget exceeded."
+        - "Image too large for OCR safely ({mp} MP > {limit} MP)."
+      canonical: "Document exceeds resource limits."
+    sources:
+      - module: backend/src/backend/ingestion/pdf_extractor.py
+        raises: UnsupportedPdfError
+      - module: backend/src/backend/ingestion/image_extractor.py
+        raises: ImageExtractorError
+
+  # ---------------------------
+  # Security flags (signals; not errors)
+  # ---------------------------
+  - code: FLAG_HAS_ACTIVE_CONTENT
+    family: security_signal
+    stage: security
+    scope: document
+    outcome: WARN
+    retryable: false
+    user_message: "Potentially risky active content detected."
+    sources:
+      - module: backend/src/backend/ingestion/pdf_extractor.py
+        emits: IngestionSecurityFlag
+      - module: backend/src/backend/ingestion/image_extractor.py
+        emits: "string flag"
+
+  - code: FLAG_HAS_EXTERNAL_LINKS
+    family: security_signal
+    stage: security
+    scope: document
+    outcome: WARN
+    retryable: false
+    user_message: "External links detected."
+    sources:
+      - module: backend/src/backend/ingestion/pdf_extractor.py
+        emits: IngestionSecurityFlag
+      - module: backend/src/backend/ingestion/image_extractor.py
+        emits: "string flag"
+
+  - code: FLAG_HAS_EMBEDDED_FILES
+    family: security_signal
+    stage: security
+    scope: document
+    outcome: WARN
+    retryable: false
+    user_message: "Embedded files or foreign objects detected."
+    sources:
+      - module: backend/src/backend/ingestion/pdf_extractor.py
+        emits: IngestionSecurityFlag
+      - module: backend/src/backend/ingestion/image_extractor.py
+        emits: "string flag"
+
+  # ---------------------------
+  # Storage (new family; normalize S3Error here) 
+  # to be discussed with abdechahid
+  # ---------------------------
+  - code: STORAGE_MINIO_UNAVAILABLE
+    family: storage
+    stage: storage_minio
+    scope: system
+    outcome: RETRY
+    retryable: true
+    user_message: "Storage is temporarily unavailable. Please retry."
+    sources:
+      - module: backend/src/backend/core/storage.py
+        raises: minio.error.S3Error
+        notes: "Use S3Error code/status to classify transient vs terminal."
+
+  - code: STORAGE_MINIO_FORBIDDEN
+    family: storage
+    stage: storage_minio
+    scope: system
+    outcome: BLOCK
+    retryable: false
+    user_message: "Storage rejected the upload."
+    sources:
+      - module: backend/src/backend/core/storage.py
+        raises: minio.error.S3Error
+
+  - code: STORAGE_MINIO_ERROR
+    family: storage
+    stage: storage_minio
+    scope: system
+    outcome: BLOCK
+    retryable: false
+    user_message: "Storage error occurred while handling the file."
+    sources:
+      - module: backend/src/backend/core/storage.py
+        raises: minio.error.S3Error
+        notes: "Catch-all bucket when S3Error does not match a more specific storage code."
+
+  # ---------------------------
+  # MinerU API/client (new family)
+  # ---------------------------
+  - code: MINERU_API_UNREACHABLE
+    family: mineru
+    stage: parsing
+    scope: system
+    outcome: RETRY
+    retryable: true
+    user_message: "Parsing service is temporarily unavailable. Please retry."
+    sources:
+      - module: backend/src/backend/ingestion/mineru_api_client.py
+        raises: "RuntimeError wrapping httpx.ConnectError"
+
+  - code: MINERU_API_BAD_RESPONSE
+    family: mineru
+    stage: parsing
+    scope: system
+    outcome: RETRY
+    retryable: true
+    user_message: "Parsing service returned an unexpected response."
+    sources:
+      - module: backend/src/backend/ingestion/mineru_api_client.py
+        raises: RuntimeError
+        notes: "Non-200 or invalid JSON."
+
+  # ---------------------------
+  # Generic buckets (unbounded raw errors collapsed into finite codes)
+  # ---------------------------
+  - code: HTTP_TIMEOUT
+    family: infra
+    stage: parsing
+    scope: system
+    outcome: RETRY
+    retryable: true
+    user_message: "A downstream service timed out. Please retry."
+    sources:
+      - module: backend/src/backend/ingestion/mineru_api_client.py
+        notes: "If using httpx timeouts, map here."
+      - module: backend/src/backend/core/services/embedding_service.py
+        notes: "httpx timeouts can map here if included in unified policy."
+
+  - code: MINERU_PARSING_ERROR
+    family: mineru
+    stage: parsing
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message: "Parsing failed for this document."
+    sources:
+      - module: backend/src/backend/core/services/mineru_parser.py
+        notes: "Catch-all bucket for MinerU failures not otherwise classified."
+      - module: docker_mineru/mineru_parser.py
+        raises: MinerUParsingError
+
+  - code: MINERU_GPU_OOM
+    family: mineru
+    stage: parsing
+    scope: page
+    outcome: RETRY
+    retryable: true
+    user_message: "Parsing resources were exhausted. Please retry."
+    sources:
+      - module: backend/src/backend/core/services/mineru_parser.py
+        notes: "Map when exception text indicates CUDA/GPU OOM or VLM engine init failures."
+
+  - code: UNEXPECTED_PARSING_EXCEPTION
+    family: parsing
+    stage: parsing
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message: "An unexpected error occurred while parsing the document."
+    sources:
+      - module: backend/src/backend/core/ingestion_pipeline.py
+        notes: "Last-resort bucket for any parsing-stage exception not otherwise mapped."
+
+  # ---------------------------
+  # Cleaning (new buckets; used once cleaning becomes non-stub)
+  # ---------------------------
+  - code: CLEANING_ERROR
+    family: cleaning
+    stage: cleaning
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message: "Cleaning failed for this document."
+    sources:
+      - module: pipeline_core.interfaces.cleaning
+        notes: "Catch-all bucket for cleaning-stage failures not otherwise classified."
+
+  - code: CLEANING_INVALID_INPUT
+    family: cleaning
+    stage: cleaning
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message: "Document content could not be cleaned due to invalid structure."
+    sources:
+      - module: pipeline_core.interfaces.cleaning
+        notes: "Use when ParsedDocument/blocks metadata is missing required fields or violates expected contract."
+
+  - code: CLEANING_RESOURCE_LIMIT_EXCEEDED
+    family: cleaning
+    stage: cleaning
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message: "Document exceeds cleaning resource limits."
+    sources:
+      - module: pipeline_core.interfaces.cleaning
+        notes: "Use for token/size/chunk-count limits, pathological inputs, or safety guards."
+
+  - code: UNEXPECTED_CLEANING_EXCEPTION
+    family: cleaning
+    stage: cleaning
+    scope: document
+    outcome: BLOCK
+    retryable: false
+    user_message: "An unexpected error occurred while cleaning the document."
+    sources:
+      - module: backend/src/backend/core/ingestion_pipeline.py
+        notes: "Last-resort bucket for any cleaning-stage exception not otherwise mapped."
