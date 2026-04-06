@@ -1,6 +1,6 @@
 # PDF conformance profiles (reference)
 
-This corpus tracks **expected ingestion behavior** in `manifest.csv`. The optional `pdf_profile` column summarizes **document shape / conformance intent** for PDFs (not a formal validator output).
+This corpus tracks **expected ingestion behavior** in `manifest.csv`. The optional `pdf_profile` column summarizes **document shape / conformance intent** for PDFs (not a formal validator output). Each row includes **`raw_url`**: a direct `raw.githubusercontent.com` link to the committed file (PDFs and images), so you can download assets without guessing paths.
 
 ## ISO-oriented families (when you need a label)
 

@@ -31,6 +31,9 @@ Typical columns:
 - `expected_security_flags`: pipe-separated list of flags if the file should be flagged
 - (optional) `notes`: short description / why this file exists
 - (optional) `pdf_profile`: conformance / shape hint for PDFs (e.g. `standard_minimal`, `encrypted_password`, `ocr_layout_stress`); see [docs/pdf_conformance_profiles.md](docs/pdf_conformance_profiles.md). Non-PDF rows leave this empty.
+- **`raw_url`**: stable HTTPS link to fetch the file from this repo’s `main` branch on GitHub (`raw.githubusercontent.com`). Paths with spaces or special characters are URL-encoded (e.g. `%20` for spaces). Use this for scripts, CI, or MinerU without cloning.
+
+**Base URL (if you build links yourself):** `https://raw.githubusercontent.com/nezha34/gnosis-ingestion-corpus/main/` + URL-encoded `file_relpath`.
 
 ### Conventions
 
