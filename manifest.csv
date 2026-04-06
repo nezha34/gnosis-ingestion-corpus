@@ -1,24 +1,25 @@
-file_relpath,category,expected_error_code,expected_security_flags,notes
-files/pdf/security/javascript.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_PDF_HAS_JAVASCRIPT,"PDF contains JS; should ingest + emit flags"
-files/pdf/security/fileAttachment.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_HAS_EMBEDDED_FILES|FLAG_PDF_HAS_JAVASCRIPT,"PDF with attachment/active content; should ingest + emit flags"
-files/pdf/security/externalLink.pdf,pdf_security,,FLAG_HAS_EXTERNAL_LINKS,"PDF with external URI links; should ingest + emit flags"
-files/pdf/security/encryption_openpassword.pdf,pdf_security,ERR_PDF_ENCRYPTED,,"Password-protected PDF; should fail with ERR_PDF_ENCRYPTED"
-files/pdf/security/encryption_nocopy.pdf,pdf_security,,,"Restricted permissions: no-copy (expected behavior may evolve)"
-files/pdf/security/encryption_noprinting.pdf,pdf_security,,,"Restricted permissions: no-printing (expected behavior may evolve)"
-files/pdf/security/encryption_notextaccess (1).pdf,pdf_security,,,"Restricted permissions: no-text-accessibility (expected behavior may evolve)"
-files/pdf/parsing/corruptionOneByteMissing.pdf,pdf_parsing,ERR_PARSE_FAILED,,"Corrupted PDF; should fail parsing"
-files/pdf/ocr/scanned_multicolumn_ocr_example.pdf,pdf_ocr,,,"Scanned multi-column; OCR + reading order challenge"
-files/pdf/ocr/uneven_multicolumn_reading_order.pdf,pdf_ocr,,,"Uneven multi-column; reading-order confusion"
-files/pdf/ocr/borderless_tables_structure_loss.pdf,pdf_ocr,,,"Borderless tables; structure loss"
-files/pdf/ocr/forms_structured_fields_va-10-10cg.pdf,pdf_ocr,,,"Form-like layout; label/value association"
-files/pdf/ocr/forms_checkbox_hell_irs_f1040.pdf,pdf_ocr,,,"Checkbox-dense forms; spatial reasoning"
-files/pdf/ocr/mixed_scanned_digital_stuyspec_xci_13.pdf,pdf_ocr,,,"Mixed digital+scanned pages; duplication/missing text risks"
-files/pdf/ocr/small_font_dense_scan_use_of_force_raw.pdf,pdf_ocr,,,"Small font dense scan; OCR dropouts"
-files/pdf/ocr/handwritten_medical_cursive_vrc2020.pdf,pdf_ocr,,,"Handwriting/cursive; OCR failure modes"
-files/pdf/ocr/old_technical_scan_5947285.pdf,pdf_ocr,,,"Old technical scan; skew + margin bleed"
-files/image/security/minimal_svg.svg,image_security,,,"Minimal SVG baseline"
-files/image/security/svg_external_link.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,"SVG <a href> external link"
-files/image/security/external_image_href.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,"SVG external href in image/link reference"
-files/image/security/active_content.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,"SVG with script/active elements (expected behavior may evolve)"
-files/image/security/embedded_foreignobject.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,"SVG foreignObject HTML embedding (expected behavior may evolve)"
-files/image/security/invalid_svg.svg,image_parsing,ERR_PARSE_FAILED,,"Invalid SVG should fail parse/validation"
+file_relpath,category,expected_error_code,expected_security_flags,notes,pdf_profile
+files/pdf/security/javascript.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_PDF_HAS_JAVASCRIPT,"PDF contains JS; should ingest + emit flags",standard_embedded_js
+files/pdf/security/fileAttachment.pdf,pdf_security,,FLAG_HAS_ACTIVE_CONTENT|FLAG_HAS_EMBEDDED_FILES|FLAG_PDF_HAS_JAVASCRIPT,"PDF with attachment/active content; should ingest + emit flags",standard_embedded_files
+files/pdf/security/externalLink.pdf,pdf_security,,FLAG_HAS_EXTERNAL_LINKS,"PDF with external URI links; should ingest + emit flags",standard_external_links
+files/pdf/security/encryption_openpassword.pdf,pdf_security,ERR_PDF_ENCRYPTED,,"Password-protected PDF; should fail with ERR_PDF_ENCRYPTED",encrypted_password
+files/pdf/security/encryption_nocopy.pdf,pdf_security,,,"Restricted permissions: no-copy (expected behavior may evolve)",encrypted_restricted
+files/pdf/security/encryption_noprinting.pdf,pdf_security,,,"Restricted permissions: no-printing (expected behavior may evolve)",encrypted_restricted
+files/pdf/security/encryption_notextaccess (1).pdf,pdf_security,,,"Restricted permissions: no-text-accessibility (expected behavior may evolve)",encrypted_restricted
+files/pdf/parsing/corruptionOneByteMissing.pdf,pdf_parsing,ERR_PARSE_FAILED,,"Corrupted PDF; should fail parsing",corrupted
+files/pdf/ocr/scanned_multicolumn_ocr_example.pdf,pdf_ocr,,,"Scanned multi-column; OCR + reading order challenge",ocr_layout_stress
+files/pdf/ocr/uneven_multicolumn_reading_order.pdf,pdf_ocr,,,"Uneven multi-column; reading-order confusion",ocr_layout_stress
+files/pdf/ocr/borderless_tables_structure_loss.pdf,pdf_ocr,,,"Borderless tables; structure loss",ocr_layout_stress
+files/pdf/ocr/forms_structured_fields_va-10-10cg.pdf,pdf_ocr,,,"Form-like layout; label/value association",ocr_layout_stress
+files/pdf/ocr/forms_checkbox_hell_irs_f1040.pdf,pdf_ocr,,,"Checkbox-dense forms; spatial reasoning",ocr_layout_stress
+files/pdf/ocr/mixed_scanned_digital_stuyspec_xci_13.pdf,pdf_ocr,,,"Mixed digital+scanned pages; duplication/missing text risks",ocr_layout_stress
+files/pdf/ocr/small_font_dense_scan_use_of_force_raw.pdf,pdf_ocr,,,"Small font dense scan; OCR dropouts",ocr_layout_stress
+files/pdf/ocr/handwritten_medical_cursive_vrc2020.pdf,pdf_ocr,,,"Handwriting/cursive; OCR failure modes",ocr_layout_stress
+files/pdf/ocr/old_technical_scan_5947285.pdf,pdf_ocr,,,"Old technical scan; skew + margin bleed",ocr_layout_stress
+files/pdf/profiles/pdf_standard_mozilla_helloworld.pdf,pdf_profile,,,"Minimal PDF 1.7; Mozilla pdf.js example; baseline standard PDF.",standard_minimal
+files/image/security/minimal_svg.svg,image_security,,,"Minimal SVG baseline",
+files/image/security/svg_external_link.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,"SVG <a href> external link",
+files/image/security/external_image_href.svg,image_security,,FLAG_HAS_EXTERNAL_LINKS,"SVG external href in image/link reference",
+files/image/security/active_content.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,"SVG with script/active elements (expected behavior may evolve)",
+files/image/security/embedded_foreignobject.svg,image_security,,FLAG_HAS_ACTIVE_CONTENT,"SVG foreignObject HTML embedding (expected behavior may evolve)",
+files/image/security/invalid_svg.svg,image_parsing,ERR_PARSE_FAILED,,"Invalid SVG should fail parse/validation",

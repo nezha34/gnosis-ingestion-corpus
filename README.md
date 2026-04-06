@@ -10,6 +10,7 @@ Shared corpus of files to test the ingestion pipeline end-to-end:
 ## Repository layout
 files/
 pdf/
+profiles/ # Small conformance / baseline PDFs (standard, future PDF/A or PDF/UA); see docs/pdf_conformance_profiles.md
 security/   # PDFs expected to ingest but emit security flags (or controlled rejects like password)
 parsing/    # PDFs expected to fail parsing / be rejected
 ocr/        # OCR / layout / reading-order stress tests (usually should ingest)
@@ -25,10 +26,11 @@ Each row describes one file and what we expect ingestion to do.
 
 Typical columns:
 - `file_relpath`: path inside this repo (relative)
-- `category`: `pdf_security`, `pdf_parsing`, `pdf_ocr`, `image_security`, `image_parsing`, `image_ocr`
+- `category`: `pdf_security`, `pdf_parsing`, `pdf_ocr`, `pdf_profile`, `image_security`, `image_parsing`, `image_ocr`
 - `expected_error_code`: expected ingestion error code if the file should fail
 - `expected_security_flags`: pipe-separated list of flags if the file should be flagged
 - (optional) `notes`: short description / why this file exists
+- (optional) `pdf_profile`: conformance / shape hint for PDFs (e.g. `standard_minimal`, `encrypted_password`, `ocr_layout_stress`); see [docs/pdf_conformance_profiles.md](docs/pdf_conformance_profiles.md). Non-PDF rows leave this empty.
 
 ### Conventions
 
