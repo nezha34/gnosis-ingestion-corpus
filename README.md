@@ -14,6 +14,7 @@ profiles/ # Small conformance / baseline PDFs (standard, future PDF/A or PDF/UA)
 security/   # PDFs expected to ingest but emit security flags (or controlled rejects like password)
 parsing/    # PDFs expected to fail parsing / be rejected
 ocr/        # OCR / layout / reading-order stress tests (usually should ingest)
+equation/   # Digital PDFs chosen for interline/display math + academic layout (MinerU equation blocks)
 image/
 security/   # Images/SVGs expected to ingest but emit security flags (when SVG scanner exists)
 parsing/    # Images expected to fail parsing / be rejected
@@ -26,7 +27,7 @@ Each row describes one file and what we expect ingestion to do.
 
 Typical columns:
 - `file_relpath`: path inside this repo (relative)
-- `category`: `pdf_security`, `pdf_parsing`, `pdf_ocr`, `pdf_profile`, `image_security`, `image_parsing`, `image_ocr`
+- `category`: `pdf_security`, `pdf_parsing`, `pdf_ocr`, `pdf_equation`, `pdf_profile`, `image_security`, `image_parsing`, `image_ocr`
 - `expected_error_code`: expected ingestion error code if the file should fail
 - `expected_security_flags`: pipe-separated list of flags if the file should be flagged
 - (optional) `notes`: short description / why this file exists
@@ -40,6 +41,7 @@ Typical columns:
 - **security/**: should generally ingest, but should emit `security_flags` (non-fatal).
 - **parsing/**: expected to fail ingestion with an error code.
 - **ocr/**: expected to ingest; used to evaluate OCR/layout quality and robustness.
+- **equation/**: expected to ingest; used to evaluate **interline/display equations**, inline math, and dense academic layout (see `files/pdf/equation/README.md`).
 
 ### Important note about SVG flags
 
