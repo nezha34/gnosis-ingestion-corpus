@@ -48,6 +48,16 @@ Typical columns:
 SVG “security flags” require an explicit SVG threat scanner (e.g., detecting `<script>`, `<a href>`, `foreignObject`, external refs).
 Until that scanner is implemented, SVG files may ingest without emitting flags even if `manifest.csv` expects them.
 That’s fine — `manifest.csv` represents the **target behavior**.
+
+## Representative matrix (coverage planning)
+
+Use [`docs/mineru_matrix_representative_pdfs.csv`](docs/mineru_matrix_representative_pdfs.csv) as the companion matrix of representative PDFs used to plan coverage across MinerU block types and layout edge cases.
+
+- `manifest.csv` = **runnable corpus inventory + expected behavior**
+- `docs/mineru_matrix_representative_pdfs.csv` = **coverage targets and representative fixtures**
+
+When adding a new representative case, prefer adding the file under `files/...` and a `manifest.csv` row first, then reference it from the matrix file.
+
 ## How to add a new file
 
 1. Put the file in the correct folder under `files/...`
